@@ -14,5 +14,5 @@ class TestRawCorpusDownloader(TestCase):
 
     def test_feed_ru(self):
         path_src = '/home/andrey/Downloads/src_files/text/ru_classic'
-        path_dst = os.path.join(RAW_CORPUS_ROOT, 'ru')
+        path_dst = os.path.join(RAW_CORPUS_ROOT, 'slav')
         RawCorpusDownloader.download(path_src, path_dst, SlavAlphabet)

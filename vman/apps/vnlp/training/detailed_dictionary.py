@@ -34,7 +34,7 @@ class DetailedDictionary:
         word_count = {}  # type: Dict[str, int]
         for file_name in files:
             full_path = os.path.join(corpus_path, file_name)
-            if not os.path.isfile(full_path):
+            if not os.path.isfile(full_path) or not file_name.endswith('.txt'):
                 continue
             cls.read_file(full_path, word_count)
 

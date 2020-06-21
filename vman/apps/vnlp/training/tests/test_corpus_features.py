@@ -3,7 +3,7 @@ import math
 import os
 from typing import List, Tuple
 from unittest import TestCase
-from PIL import Image, ImageDraw, ImageColor
+from PIL import Image, ImageDraw
 
 from vman.apps.vnlp.training.alphabet import EnAlphabet, SlavAlphabet
 from vman.apps.vnlp.training.corpus_features import CorpusFeatures
@@ -45,14 +45,15 @@ class TestCorpusFeatures(TestCase):
         self.assertGreater(len(wrd.root), 0)
 
     def test_colorize_corpuses(self):
-        corpuses = [os.path.join(RAW_CORPUS_ROOT, 'en'),
-                    os.path.join(RAW_CORPUS_ROOT, 'slav')]
+        langs = ['en', 'slav']
+        corpuses = [os.path.join(RAW_CORPUS_ROOT, l) for l in langs]
         alphabets = [EnAlphabet, SlavAlphabet]
+        #langs = ['slav']
+        #corpuses = [os.path.join(RAW_CORPUS_ROOT, l) for l in langs]
+        #alphabets = [SlavAlphabet]
 
-        for corp, alph in zip(corpuses, alphabets):
-            cf = CorpusFeatures('-', alph, corp)
-            cf.build()
-
+        for lang, corp, alph in zip(langs, corpuses, alphabets):
+            cf = CorpusFeatures.build_or_load_cached(corp, lang, alph, True)
             files = [f for f in os.listdir(corp)]
             for file_name in files:
                 full_path = os.path.join(corp, file_name)
@@ -81,13 +82,25 @@ class TestCorpusFeatures(TestCase):
         x, y = 0, 0
         f_min = 0
         f_max = max([w[0] for w in coded])
+
+        # this coeffs make picture more colorful
+        intense_min = 35
+        modifier_multiplier = 3
+
         for freq, pf, sf in coded:
-            intense = int(255 * (freq - f_min) / f_max)
+            f_rel = (freq - f_min) / f_max
+            if pf or sf:
+                f_rel *= modifier_multiplier
+
+            intense = int((255 - intense_min) * f_rel) + intense_min
             r = intense if pf or not (pf or sf) else 0
             g = intense if sf or not (pf or sf) else 0
             b = intense if not (pf or sf) else 0
 
-            #color = ImageColor.getrgb(f'{r:%02x}{g:%02x}{b:%02x}')
+            r = min(r, 255)
+            g = min(g, 255)
+            b = min(b, 255)
+
             color = (r, g, b,)
             draw.rectangle([x * cell_size, y * cell_size,
                             (x + 1) * cell_size, (y + 1) * cell_size],

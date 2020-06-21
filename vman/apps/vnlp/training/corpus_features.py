@@ -1,3 +1,6 @@
+import codecs
+import os
+import pickle
 from typing import Optional, Set, Dict, List, Tuple
 
 from vman.apps.vnlp.training.alphabet import Alphabet
@@ -17,12 +20,41 @@ class CorpusFeatures:
         self.ngrams_collector = None  # type: Optional[MarginNgramsCollector]
         self.all_words = set()  # type: Set[str]
 
-    def build(self):
+    @classmethod
+    def build_or_load_cached(cls,
+                             corpus_path: str,
+                             language: Optional[str] = None,
+                             alphabet: Optional[Alphabet] = None,
+                             save_features_file: bool = True):
+        features_path = os.path.join(corpus_path, 'features.bin')
+        if os.path.isfile(features_path):
+            try:
+                return cls.load_from_file(features_path)
+            except Exception as e:
+                print(f'Error loading file "{features_path}": {e}')
+        corpus = CorpusFeatures(language, alphabet, corpus_path)
+        corpus.build(save_features_file=save_features_file)
+        return corpus
+
+    def build(self, save_features_file: bool = True):
         self.dictionary = DetailedDictionary.read_from_corpus(self.corpus_path)
         self.all_words = {d.word for d in self.dictionary.words}
         self.ngrams_collector = MarginNgramsCollector(self.alphabet, self.dictionary)
         self.ngrams_collector.build()
         self.find_dict_morphs()
+        self.update_margin_ngrams()
+        if save_features_file:
+            features_path = os.path.join(self.corpus_path, 'features.bin')
+            self.save_to_file(features_path)
+
+    def save_to_file(self, path: str):
+        with codecs.open(path, 'wb') as fw:
+            pickle.dump(self, fw)
+
+    @classmethod
+    def load_from_file(cls, path: str):  # CorpusFeatures
+        with codecs.open(path, 'rb') as fr:
+            return pickle.load(fr)
 
     def encode_words_by_morphs(self, words: List[str]) -> List[Tuple[float, float, float]]:
         coded = []  # type: List[Tuple[float, float, float]]
@@ -103,3 +135,29 @@ class CorpusFeatures:
                     if modf in self.all_words:
                         return root
         return None
+
+    def update_margin_ngrams(self):
+        mgrams = {}  # type: Dict[Tuple[str, int], MarginNgram]
+        for word in self.dictionary.words:
+            word_grams = [(word.prefix, 1,), (word.suffix, -1,)]
+            for word_gram, gram_dir in word_grams:
+                if not word_gram:
+                    continue
+                mgram = mgrams.get((word_gram, gram_dir,))
+                if mgram:
+                    mgram.modified_count += 1
+                    mgram.dic_occurs += word.count
+                else:
+                    mgrams[(word_gram, gram_dir,)] = \
+                        MarginNgram(word_gram, gram_dir, word.count, 1)
+
+        self.ngrams_collector.prefixes = []
+        self.ngrams_collector.suffixes = []
+        self.ngrams_collector.all_grams = []
+        for key in mgrams:
+            mgram = mgrams[key]
+            self.ngrams_collector.all_grams.append(mgram)
+            if mgram.direct == 1:
+                self.ngrams_collector.prefixes.append(mgram)
+            else:
+                self.ngrams_collector.suffixes.append(mgram)

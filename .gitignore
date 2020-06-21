@@ -9,3 +9,5 @@ _build/
 /pythonparser/coverage/parser.py
 /doc/coverage/*
 /venv/
+vman/corpus/raw/*/*.bin
+vman/corpus/raw/*/*.png

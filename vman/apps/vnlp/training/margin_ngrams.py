@@ -73,7 +73,7 @@ class MarginNgramsCollector:
                 suffixes[suffix] = suffix_count + 1  # word.count
 
         # remove rare cases
-        threshold = 0.01
+        threshold = 0.005
         min_count = int(self.dictionary.words_total * threshold)
         for sfx in prefixes:
             if prefixes[sfx] >= min_count:
