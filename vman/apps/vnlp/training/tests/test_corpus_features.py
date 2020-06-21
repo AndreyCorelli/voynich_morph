@@ -84,23 +84,21 @@ class TestCorpusFeatures(TestCase):
         f_max = max([w[0] for w in coded])
 
         # this coeffs make picture more colorful
-        intense_min = 35
-        modifier_multiplier = 3
+        colored_intense_min = 90
 
         for freq, pf, sf in coded:
             f_rel = (freq - f_min) / f_max
-            if pf or sf:
-                f_rel *= modifier_multiplier
-
+            is_gray = not (pf or sf)
+            intense_min = 0 if is_gray else colored_intense_min
             intense = int((255 - intense_min) * f_rel) + intense_min
-            r = intense if pf or not (pf or sf) else 0
-            g = intense if sf or not (pf or sf) else 0
-            b = intense if not (pf or sf) else 0
+
+            r = intense if (pf or is_gray) else 0
+            g = intense if (sf or is_gray) else 0
+            b = intense if is_gray else 0
 
             r = min(r, 255)
             g = min(g, 255)
             b = min(b, 255)
-
             color = (r, g, b,)
             draw.rectangle([x * cell_size, y * cell_size,
                             (x + 1) * cell_size, (y + 1) * cell_size],
