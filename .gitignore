@@ -1,0 +1,11 @@
+.idea/
+*.pyc
+__pycache__/
+_build/
+*.egg-info/
+/.eggs/
+/build/
+/dist/
+/pythonparser/coverage/parser.py
+/doc/coverage/*
+/venv/
