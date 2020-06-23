@@ -27,3 +27,9 @@ class EnAlphabet(Alphabet):
 
 class SlavAlphabet(Alphabet):
     reg_word = re.compile(r'[абвгдеёжзийклмнопрстуфхцчшщъьэюяѣi]+')
+
+
+alphabet_by_code = {
+    'en': EnAlphabet,
+    'slav': SlavAlphabet
+}

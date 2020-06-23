@@ -1,3 +1,4 @@
+import json
 from typing import Dict, List, Tuple, Optional
 
 from vman.apps.vnlp.training.alphabet import Alphabet
@@ -48,7 +49,10 @@ class MarginNgramsCollector:
                  dictionary: DetailedDictionary):
         self.alphabet = alphabet
         self.dictionary = dictionary
-        self.unique_words = {w.word for w in dictionary.words}
+        if self.dictionary:
+            self.unique_words = {w.word for w in dictionary.words}
+        else:
+            self.unique_words = {}
         self.prefixes = []  # type: List[MarginNgram]
         self.suffixes = []  # type: List[MarginNgram]
         self.all_grams = []  # type: List[MarginNgram]
@@ -138,7 +142,25 @@ class MarginNgramsCollector:
                         if word_root in self.unique_words:
                             item.modified_count += 1
 
+    def json_serialize(self) -> str:
+        data = [{
+            'text': n.text,
+            'direct': n.direct,
+            'dic_occurs': n.dic_occurs,
+            'modified_count': n.modified_count
+        } for n in self.all_grams]
+        return json.dumps(data)
 
-
-
-
+    @classmethod
+    def json_deserialize(cls, data_str: str):  # MarginNgramsCollector
+        data = json.loads(data_str)
+        collector = MarginNgramsCollector(None, None)
+        for dic in data:
+            mgr = MarginNgram(dic['text'], dic['direct'],
+                              dic['dic_occurs'], dic['modified_count'])
+            collector.all_grams.append(mgr)
+            if mgr.direct == 1:
+                collector.prefixes.append(mgr)
+            else:
+                collector.suffixes.append(mgr)
+        return collector

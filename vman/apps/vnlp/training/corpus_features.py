@@ -1,18 +1,21 @@
 import codecs
 import os
-import pickle
+import json
 from typing import Optional, Set, Dict, List, Tuple
 
-from vman.apps.vnlp.training.alphabet import Alphabet
+from vman.apps.vnlp.training.alphabet import Alphabet, alphabet_by_code
 from vman.apps.vnlp.training.detailed_dictionary import DetailedDictionary, WordCard
 from vman.apps.vnlp.training.margin_ngrams import MarginNgramsCollector, MarginNgram
 
 
 class CorpusFeatures:
+    ACTUAL_VERSION = '1.0'
+
     def __init__(self,
                  language: str,
                  alphabet: Alphabet,
                  corpus_path: str):
+        self.version = self.ACTUAL_VERSION
         self.language = language
         self.alphabet = alphabet
         self.corpus_path = corpus_path
@@ -21,40 +24,100 @@ class CorpusFeatures:
         self.all_words = set()  # type: Set[str]
 
     @classmethod
-    def build_or_load_cached(cls,
-                             corpus_path: str,
-                             language: Optional[str] = None,
-                             alphabet: Optional[Alphabet] = None,
-                             save_features_file: bool = True):
-        features_path = os.path.join(corpus_path, 'features.bin')
-        if os.path.isfile(features_path):
-            try:
-                return cls.load_from_file(features_path)
-            except Exception as e:
-                print(f'Error loading file "{features_path}": {e}')
-        corpus = CorpusFeatures(language, alphabet, corpus_path)
-        corpus.build(save_features_file=save_features_file)
-        return corpus
+    def load_from_folder(cls, folder: str):  # Dict[str, List[CorpusFeatures]]
+        """
+        "folder" should have the following structure:
+         - raw
+           - <lang_1>
+             - <file_1_1>.txt  # source text - words in lowercase, space-separated
+             ..
+           - <lang_N>
+         - features
+           - <file_1_1>.json  # JSON-encoded CorpusFeatures for file_1_1.txt "corpus"
+           ..
 
-    def build(self, save_features_file: bool = True):
-        self.dictionary = DetailedDictionary.read_from_corpus(self.corpus_path)
+        """
+        data = {}  # type: Dict[str, List[CorpusFeatures]]
+
+        raw_path = os.path.join(folder, 'raw')
+        features_path = os.path.join(folder, 'features')
+        if not os.path.isdir(features_path):
+            os.mkdir(features_path)
+
+        dirs = [f for f in os.listdir(raw_path)]
+        for dir_name in dirs:
+            sub_path = os.path.join(raw_path, dir_name)
+            if not os.path.isdir(sub_path):
+                continue
+
+            language = dir_name  # now we somwhere like '.../raw/fr/'
+            files = [f for f in os.listdir(sub_path)]
+            for file_name in files:
+                full_path = os.path.join(sub_path, file_name)  # '.../raw/fr/file01.txt'
+                if not os.path.isfile(full_path) or not file_name.endswith('.txt'):
+                    continue
+                # try "cached" feature file
+                features_name = os.path.splitext(file_name)[0] + '.json'
+                feature_path = os.path.join(features_path, dir_name, features_name)
+                corpus = None  # type: Optional[CorpusFeatures]
+                if os.path.isfile(feature_path):
+                    try:
+                        cf = CorpusFeatures.load_from_file(feature_path)
+                        if cf.version != cls.ACTUAL_VERSION:
+                            print(f'File "{feature_path}" has version "{cf.version}"')
+                        else:
+                            corpus = cf
+                    except Exception as e:
+                        print(f'Error loading "{feature_path}": {e}')
+                if not corpus:
+                    # build corpus
+                    alph = alphabet_by_code[language]
+                    corpus = CorpusFeatures(language, alph, full_path)
+                    dict = DetailedDictionary.read_from_file(full_path)
+                    corpus.build(dict)
+                    # cache corpus
+                    feature_subfolder = os.path.join(features_path, dir_name)
+                    if not os.path.isdir(feature_subfolder):
+                        os.mkdir(feature_subfolder)
+                    corpus.save_to_file(feature_path)
+
+                if language not in data:
+                    data[language] = [corpus]
+                else:
+                    data[language].append(corpus)
+        return data
+
+    def build(self, dictionary: DetailedDictionary):
+        self.dictionary = dictionary
         self.all_words = {d.word for d in self.dictionary.words}
         self.ngrams_collector = MarginNgramsCollector(self.alphabet, self.dictionary)
         self.ngrams_collector.build()
         self.find_dict_morphs()
         self.update_margin_ngrams()
-        if save_features_file:
-            features_path = os.path.join(self.corpus_path, 'features.bin')
-            self.save_to_file(features_path)
 
     def save_to_file(self, path: str):
-        with codecs.open(path, 'wb') as fw:
-            pickle.dump(self, fw)
+        data = {
+            'version': self.version,
+            'language': self.language,
+            'alphabet': self.alphabet.__name__,
+            'path': self.corpus_path,
+            'dictionary': self.dictionary.json_serialize(),
+            'ngrams_collector': self.ngrams_collector.json_serialize()
+        }
+        with codecs.open(path, 'w', encoding='utf-8') as fw:
+            s = json.dumps(data)
+            fw.write(s)
 
     @classmethod
     def load_from_file(cls, path: str):  # CorpusFeatures
         with codecs.open(path, 'rb') as fr:
-            return pickle.load(fr)
+            data = json.load(fr)
+        alphabet = f'vman.apps.vnlp.training.alphabet.{data["alphabet"]}'
+        cf = CorpusFeatures(data['language'], alphabet, data['path'])
+        cf.version = data['version']
+        cf.dictionary = DetailedDictionary.json_deserialize(data['dictionary'])
+        cf.ngrams_collector = MarginNgramsCollector.json_deserialize(data['ngrams_collector'])
+        return cf
 
     def encode_words_by_morphs(self, words: List[str]) -> List[Tuple[float, float, float]]:
         coded = []  # type: List[Tuple[float, float, float]]

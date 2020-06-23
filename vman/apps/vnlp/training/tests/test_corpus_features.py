@@ -9,21 +9,30 @@ from vman.apps.vnlp.training.alphabet import EnAlphabet, SlavAlphabet
 from vman.apps.vnlp.training.corpus_features import CorpusFeatures
 from vman.apps.vnlp.training.detailed_dictionary import DetailedDictionary, WordCard
 from vman.apps.vnlp.training.margin_ngrams import MarginNgramsCollector, MarginNgram
-from vman.corpus.corpus_data import RAW_CORPUS_ROOT
+from vman.corpus.corpus_data import RAW_CORPUS_ROOT, FEATURES_CORPUS_ROOT, CORPUS_ROOT
 
 
 class TestCorpusFeatures(TestCase):
     def test_build_corpus_features_en(self):
         path_src = os.path.join(RAW_CORPUS_ROOT, 'en')
-        cf = CorpusFeatures('en', EnAlphabet, path_src)
-        cf.build()
+        file_name = [f for f in os.listdir(path_src)][0]
+        file_path = os.path.join(path_src, file_name)
+
+        dd = DetailedDictionary.read_from_file(file_path)
+        cf = CorpusFeatures('en', EnAlphabet, file_path)
+        cf.build(dd)
         self.assertGreater(len(cf.ngrams_collector.suffixes), 5)
 
-    def test_build_corpus_features_ru(self):
-        path_src = os.path.join(RAW_CORPUS_ROOT, 'slav')
-        cf = CorpusFeatures('slav', SlavAlphabet, path_src)
-        cf.build()
+    def test_load_corpus_features_en(self):
+        path_src = os.path.join(FEATURES_CORPUS_ROOT, 'en')
+        path_src = os.path.join(path_src, 'features.json')
+        cf = CorpusFeatures.load_from_file(path_src)
         self.assertGreater(len(cf.ngrams_collector.suffixes), 5)
+
+    def test_build_all_features(self):
+        corpus_by_lang = CorpusFeatures.load_from_folder(CORPUS_ROOT)
+        keys = [k for k in corpus_by_lang]
+        self.assertGreater(len(keys), 1)
 
     def test_find_morphs(self):
         cf = CorpusFeatures('en', EnAlphabet, '')
@@ -45,18 +54,16 @@ class TestCorpusFeatures(TestCase):
         self.assertGreater(len(wrd.root), 0)
 
     def test_colorize_corpuses(self):
-        langs = ['en', 'slav']
-        corpuses = [os.path.join(RAW_CORPUS_ROOT, l) for l in langs]
-        alphabets = [EnAlphabet, SlavAlphabet]
-        #langs = ['slav']
-        #corpuses = [os.path.join(RAW_CORPUS_ROOT, l) for l in langs]
-        #alphabets = [SlavAlphabet]
+        corpus_by_lang = CorpusFeatures.load_from_folder(CORPUS_ROOT)
+        for lang_folder in os.listdir(RAW_CORPUS_ROOT):
+            subfolder = os.path.join(RAW_CORPUS_ROOT, lang_folder)
+            if not os.path.isdir(subfolder):
+                continue
+            corpuses = corpus_by_lang[lang_folder]
 
-        for lang, corp, alph in zip(langs, corpuses, alphabets):
-            cf = CorpusFeatures.build_or_load_cached(corp, lang, alph, True)
-            files = [f for f in os.listdir(corp)]
+            files = [f for f in os.listdir(subfolder)]
             for file_name in files:
-                full_path = os.path.join(corp, file_name)
+                full_path = os.path.join(subfolder, file_name)
                 if not os.path.isfile(full_path) or not file_name.endswith('.txt'):
                     continue
                 with codecs.open(full_path, 'r', encoding='utf-8') as fr:
@@ -64,6 +71,8 @@ class TestCorpusFeatures(TestCase):
                 words = text.split(' ')
                 if not words:
                     continue
+
+                cf = [c for c in corpuses if c.corpus_path == full_path][0]
                 new_file_name = os.path.splitext(full_path)[0]
                 new_file_name = new_file_name + '.png'
 
