@@ -110,7 +110,7 @@ traitlets==4.3.2
 typing==3.6.2
 tzlocal==1.5.1
 Unidecode==0.4.21
-urllib3==1.24.1
+urllib3==1.24.2
 us==1.0.0
 virtualenv==15.1.0
 wcwidth==0.1.7
