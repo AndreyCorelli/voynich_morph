@@ -24,7 +24,9 @@ class CorpusFeatures:
         self.all_words = set()  # type: Set[str]
 
     @classmethod
-    def load_from_folder(cls, folder: str):  # Dict[str, List[CorpusFeatures]]
+    def load_from_folder(cls,
+                         folder: str,
+                         ignore_cached: bool = False):  # Dict[str, List[CorpusFeatures]]
         """
         "folder" should have the following structure:
          - raw
@@ -60,7 +62,7 @@ class CorpusFeatures:
                 features_name = os.path.splitext(file_name)[0] + '.json'
                 feature_path = os.path.join(features_path, dir_name, features_name)
                 corpus = None  # type: Optional[CorpusFeatures]
-                if os.path.isfile(feature_path):
+                if not ignore_cached and os.path.isfile(feature_path):
                     try:
                         cf = CorpusFeatures.load_from_file(feature_path)
                         if cf.version != cls.ACTUAL_VERSION:
