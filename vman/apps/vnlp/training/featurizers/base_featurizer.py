@@ -5,7 +5,7 @@ from vman.apps.vnlp.training.corpus_features import CorpusFeatures
 
 
 class BaseFeaturizer:
-    def featurize_folder(self, corpus_folder: str) -> List[float]:
+    def featurize_folder(self, corpus_folder: str) -> Dict[str, List[Tuple[str, List[float]]]]:
         """
         Folder structure should correspond to the one used by
         CorpusFeatures.load_from_folder() method, i.e.:
@@ -22,14 +22,16 @@ class BaseFeaturizer:
             features_by_lang[lang] = feature_list
 
             for corpus in corpuses:
-                src_path = corpus.corpus_path
-                with codecs.open(src_path, 'r', encoding='utf-8') as fr:
-                    text = fr.read()
-                words = text.split(' ')
-                feature_vector = self.featurize_words(words, corpus)
-                feature_list.append((src_path, feature_vector,))
+                feature_list.append(self.featurize_corpus(corpus))
 
         return features_by_lang
+
+    def featurize_corpus(self, corpus: CorpusFeatures) -> List[float]:
+        src_path = corpus.corpus_path
+        with codecs.open(src_path, 'r', encoding='utf-8') as fr:
+            text = fr.read()
+        words = text.split(' ')
+        return self.featurize_words(words, corpus)
 
     def featurize_words(self, words: List[str], corpus: CorpusFeatures) -> List[float]:
         raise NotImplementedError()

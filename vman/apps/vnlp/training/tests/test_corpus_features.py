@@ -31,8 +31,7 @@ class TestCorpusFeatures(TestCase):
 
     def test_build_all_features(self):
         corpus_by_lang = CorpusFeatures.load_from_folder(CORPUS_ROOT)
-        keys = [k for k in corpus_by_lang]
-        self.assertGreater(len(keys), 1)
+        self.assertGreater(len(corpus_by_lang), 3)
 
     def test_find_morphs(self):
         cf = CorpusFeatures('en', EnAlphabet, '')
