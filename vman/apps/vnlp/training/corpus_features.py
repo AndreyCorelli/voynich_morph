@@ -23,10 +23,18 @@ class CorpusFeatures:
         self.ngrams_collector = None  # type: Optional[MarginNgramsCollector]
         self.all_words = set()  # type: Set[str]
 
+    def __repr__(self):
+        corp_file = self.corpus_path or ''
+        try:
+            corp_file = os.path.basename(corp_file)
+        except:
+            pass
+        return f'[{self.language}] - {corp_file}'
+
     @classmethod
     def load_from_folder(cls,
                          folder: str,
-                         ignore_cached: bool = False):  # List[CorpusCollectionRecord]
+                         ignore_cached: bool = False):  # List[CorpusFeatures]
         """
         "folder" should have the following structure:
          - raw
@@ -39,7 +47,7 @@ class CorpusFeatures:
            ..
 
         """
-        data = []  # type: List[CorpusCollectionRecord]
+        data = []  # type: List[CorpusFeatures]
 
         raw_path = os.path.join(folder, 'raw')
         features_path = os.path.join(folder, 'features')
@@ -83,7 +91,7 @@ class CorpusFeatures:
                         os.mkdir(feature_subfolder)
                     corpus.save_to_file(feature_path)
 
-                data.append(CorpusCollectionRecord(language, full_path, corpus))
+                data.append(corpus)
         return data
 
     def build(self, dictionary: DetailedDictionary):
@@ -223,21 +231,3 @@ class CorpusFeatures:
                 self.ngrams_collector.prefixes.append(mgram)
             else:
                 self.ngrams_collector.suffixes.append(mgram)
-
-
-class CorpusCollectionRecord:
-    def __init__(self,
-                 language: str,
-                 src_path: str,
-                 features: CorpusFeatures):
-        self.language = language
-        self.src_path = src_path
-        self.features = features
-
-    def __repr__(self):
-        f_name = self.src_path or ''
-        try:
-            f_name = os.path.basename(f_name)
-        except:
-            pass
-        return f'[{self.language}], "{f_name}"'

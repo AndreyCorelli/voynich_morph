@@ -16,3 +16,7 @@ class RandomForestLangClassifier(BaseClassifier):
 
     def _classify(self, x: List[List[float]]) -> List[float]:
         return self.classifier.predict(x)
+
+    def _classify_vector(self, x: List[List[float]]) -> List[List[float]]:
+        probs = self.classifier.predict_proba(x)
+        return probs.tolist()
