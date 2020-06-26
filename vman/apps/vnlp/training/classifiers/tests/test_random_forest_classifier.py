@@ -6,7 +6,7 @@ from vman.apps.vnlp.training.corpus_features import CorpusFeatures
 from vman.apps.vnlp.training.featurizers.word_morph_featurizer import WordMorphFeaturizer
 from vman.corpus.corpus_data import CORPUS_ROOT
 
-# comment this line out for the result not be deterministic
+# comment this line out for the result not to be deterministic
 random.seed(1)
 
 
