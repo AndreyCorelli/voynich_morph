@@ -26,15 +26,20 @@ class EnAlphabet(Alphabet):
 
 
 class RuAlphabet(Alphabet):
-    reg_word = re.compile(r'[абвгдеёжзийклмнопрстуфхцчшщъьэюя]+')
+    reg_word = re.compile(r'[абвгдеёжзийклмнопрстуфхцчшщъыьэюя]+')
 
 
 class SlavAlphabet(Alphabet):
-    reg_word = re.compile(r'[абвгдеёжзийклмнопрстуфхцчшщъьэюяѣi]+')
+    reg_word = re.compile(r'[абвгдеёжзийклмнопрстуфхцчшщъыьэюяѣi]+')
+
+
+class LatinAlphabet(Alphabet):
+    reg_word = re.compile(r'[abcdeffhiklmnopqrstvxyz]+')
 
 
 alphabet_by_code = {
     'en': EnAlphabet,
     'ru': SlavAlphabet,
-    'slav': SlavAlphabet
+    'slav': SlavAlphabet,
+    'lat': LatinAlphabet
 }
