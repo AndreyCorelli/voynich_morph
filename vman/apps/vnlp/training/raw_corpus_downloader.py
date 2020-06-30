@@ -48,25 +48,28 @@ class RawCorpusDownloader:
                  src_folder: str,
                  out_folder: str,
                  abet: Type,
-                 encoding='utf-8'):
+                 encoding='utf-8',
+                 processor: RawTextProcessor = None):
+        processor = processor or RawTextProcessor
         files = [f for f in os.listdir(src_folder)]
         for file_name in files:
             full_path = os.path.join(src_folder, file_name)
             if not os.path.isfile(full_path):
                 continue
-            cls.download_file(full_path, out_folder, abet, encoding)
+            cls.download_file(full_path, out_folder, abet, encoding, processor)
 
     @classmethod
     def download_file(cls,
                       file_path: str,
                       out_folder: str,
                       abet: Type,
-                      encoding='utf-8'):
+                      encoding: str,
+                      processor: RawTextProcessor):
         name = os.path.splitext(os.path.basename(file_path))[0]
         with codecs.open(file_path, mode='r', encoding=encoding) as fr:
             file_text = fr.read()
 
         out_path = os.path.join(out_folder, name)
         with FileSplitStream(out_path, cls.MIN_FILE_WORDS, cls.MAX_FILE_WORDS) as fw:
-            for word in RawTextProcessor.extract_words(file_text, abet):
+            for word in processor.extract_words(file_text, abet):
                 fw.store_word(word)

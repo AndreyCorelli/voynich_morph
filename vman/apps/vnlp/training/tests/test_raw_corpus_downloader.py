@@ -1,7 +1,9 @@
 import os
 from unittest import TestCase
 
-from vman.apps.vnlp.training.alphabet import EnAlphabet, SlavAlphabet, RuAlphabet, LatinAlphabet
+from vman.apps.vnlp.training.alphabet import EnAlphabet, SlavAlphabet, RuAlphabet, \
+    LatinAlphabet, EvaBasicAlphabetA
+from vman.apps.vnlp.training.eva_processor import EvaProcessor
 from vman.apps.vnlp.training.raw_corpus_downloader import RawCorpusDownloader
 from vman.corpus.corpus_data import RAW_CORPUS_ROOT
 
@@ -26,3 +28,9 @@ class TestRawCorpusDownloader(TestCase):
         path_src = '/home/andrey/Downloads/src_files/text/latin'
         path_dst = os.path.join(RAW_CORPUS_ROOT, 'lat')
         RawCorpusDownloader.download(path_src, path_dst, LatinAlphabet)
+
+    def test_feed_eva_basic_a(self):
+        path_src = '/home/andrey/Downloads/src_files/text/vman'
+        path_dst = os.path.join(RAW_CORPUS_ROOT, 'eba')
+        RawCorpusDownloader.download(path_src, path_dst, EvaBasicAlphabetA,
+                                     encoding='utf-8', processor=EvaProcessor)

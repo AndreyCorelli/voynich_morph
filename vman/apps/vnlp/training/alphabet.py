@@ -37,9 +37,14 @@ class LatinAlphabet(Alphabet):
     reg_word = re.compile(r'[abcdeffhiklmnopqrstvxyz]+')
 
 
+class EvaBasicAlphabetA(Alphabet):
+    reg_word = re.compile(r'[\*\'abcdefghijklmnopqrstuvxyz]+')
+
+
 alphabet_by_code = {
     'en': EnAlphabet,
     'ru': SlavAlphabet,
     'slav': SlavAlphabet,
-    'lat': LatinAlphabet
+    'lat': LatinAlphabet,
+    'eba': EvaBasicAlphabetA
 }
