@@ -20,6 +20,7 @@ class TestRandomForestClassifier(TestCase):
     def test_train_predict(self):
         clsf = RandomForestLangClassifier(WordMorphFeaturizer())
         all_records = CorpusFeatures.load_from_folder(CORPUS_ROOT)
+        all_records = [r for r in all_records if r.language != 'eba']
         train, test = clsf.split_train_test(all_records)
         lang_id = RandomForestLangClassifier.encode_languages(all_records)
         id_lang = {lang_id[l]: l for l in lang_id}
