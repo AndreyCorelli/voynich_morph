@@ -26,9 +26,12 @@ class TestRandomForestClassifier(TestCase):
 
         clsf.train_on_files(train, all_records)
         test_classes = clsf.classify(test)
+        misses = sum([1 for i in range(len(test)) if test[i].language != id_lang.get(test_classes[i])])
+        print(f'{misses} misses out of {len(test)} tests')
         for i in range(len(test)):
             lang = id_lang.get(test_classes[i]) or '-'
-            print(f'{test[i]}, lang classified as "{lang}"')
+            prefix = '* ' if test[i].language != lang else ''
+            print(f'{prefix}{test[i]}, lang classified as "{lang}"')
 
     def test_predict_voynich(self):
         v_langs = {'eba'}
