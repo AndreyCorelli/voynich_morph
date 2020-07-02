@@ -72,4 +72,5 @@ class RawCorpusDownloader:
         out_path = os.path.join(out_folder, name)
         with FileSplitStream(out_path, cls.MIN_FILE_WORDS, cls.MAX_FILE_WORDS) as fw:
             for word in processor.extract_words(file_text, abet):
+                word = abet.preprocess_word(word)
                 fw.store_word(word)
