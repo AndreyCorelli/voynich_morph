@@ -42,13 +42,16 @@ class TestRandomForestClassifier(TestCase):
         train = [r for r in all_records if r.language not in v_langs]
         test = [r for r in all_records if r.language in v_langs]
 
-        lang_id = RandomForestLangClassifier.encode_languages(all_records)
+        lang_id = RandomForestLangClassifier.encode_languages(train)
         id_lang = {lang_id[l]: l for l in lang_id}
 
         clsf.train_on_files(train, all_records)
-        test_classes = clsf.classify_vector(test)
-        for i in range(len(test)):
-            lang = id_lang.get(test_classes[i][0]) or '-'
-            prob = test_classes[i][1]
+        test_classes = clsf.classify_vector(test)[0]
+        m_index, mval = 0, 0
+        for i in range(len(test_classes)):
+            if test_classes[i] > mval:
+                mval = test_classes[i]
+                m_index = i
 
-            print(f'{test[i]}, lang classified as "{lang}", probability estimated: {prob}')
+        lang = id_lang.get(m_index) or '-'
+        print(f'EBA-encoded, Lang classified as "{lang}", probability estimated as {mval}')

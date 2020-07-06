@@ -37,6 +37,10 @@ class SlavAlphabet(Alphabet):
     reg_word = re.compile(r'[абвгдеёжзийклмнопрстуфхцчшщъыьэюяѣi]+')
 
 
+class PolishAlphabet(Alphabet):
+    reg_word = re.compile(r'[aąbcćdeęfghijklłmnńoóprsśtuwyzźż]+')
+
+
 class LatinAlphabet(Alphabet):
     reg_word = re.compile(r'[abcdeffhiklmnopqrstvxyz]+')
 
@@ -77,6 +81,7 @@ alphabet_by_code = {
     'en': EnAlphabet,
     'ru': SlavAlphabet,
     'slav': SlavAlphabet,
+    'polsky': PolishAlphabet,
     'lat': LatinAlphabet,
     'greek': GreekAlphabet,
     'eba': EvaBasicAlphabetA

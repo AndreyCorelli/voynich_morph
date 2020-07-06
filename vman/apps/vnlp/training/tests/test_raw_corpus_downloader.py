@@ -2,7 +2,7 @@ import os
 from unittest import TestCase
 
 from vman.apps.vnlp.training.alphabet import EnAlphabet, SlavAlphabet, RuAlphabet, \
-    LatinAlphabet, EvaBasicAlphabetA, GreekAlphabet
+    LatinAlphabet, EvaBasicAlphabetA, GreekAlphabet, PolishAlphabet
 from vman.apps.vnlp.training.eva_processor import EvaProcessor
 from vman.apps.vnlp.training.raw_corpus_downloader import RawCorpusDownloader
 from vman.corpus.corpus_data import RAW_CORPUS_ROOT
@@ -23,6 +23,11 @@ class TestRawCorpusDownloader(TestCase):
         path_src = '/home/andrey/Downloads/src_files/text/ru_classic'
         path_dst = os.path.join(RAW_CORPUS_ROOT, 'ru')
         RawCorpusDownloader.download(path_src, path_dst, RuAlphabet)
+
+    def test_feed_polish(self):
+        path_src = '/home/andrey/Downloads/src_files/text/polsky'
+        path_dst = os.path.join(RAW_CORPUS_ROOT, 'polsky')
+        RawCorpusDownloader.download(path_src, path_dst, PolishAlphabet)
 
     def test_feed_lat(self):
         path_src = '/home/andrey/Downloads/src_files/text/latin'

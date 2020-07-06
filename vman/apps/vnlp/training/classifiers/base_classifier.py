@@ -29,7 +29,7 @@ class BaseClassifier:
         langs_list.sort()
         lang_id = {}  # type: Dict[str, int]
         for i in range(len(langs_list)):
-            lang_id[langs_list[i]] = i + 1
+            lang_id[langs_list[i]] = i
         return lang_id
 
     def train_on_files(self,
@@ -67,5 +67,5 @@ class BaseClassifier:
         y = []  # type: List[float]
         for corpus in train_records:
             x.append(self.featurizer.featurize_corpus(corpus))
-            y.append(self.lang_code.get(corpus.language) or 0)
+            y.append(self.lang_code.get(corpus.language))
         return x, y
