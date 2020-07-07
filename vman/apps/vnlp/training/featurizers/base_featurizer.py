@@ -35,3 +35,7 @@ class BaseFeaturizer:
 
     def featurize_words(self, words: List[str], corpus: CorpusFeatures) -> List[float]:
         raise NotImplementedError()
+
+    @classmethod
+    def get_feature_names(self) -> List[str]:
+        raise NotImplementedError()

@@ -55,3 +55,5 @@ class TestRandomForestClassifier(TestCase):
 
         lang = id_lang.get(m_index) or '-'
         print(f'EBA-encoded, Lang classified as "{lang}", probability estimated as {mval}')
+
+        clsf.visualize('/home/andrey/Downloads/src_files/text/', WordMorphFeaturizer)

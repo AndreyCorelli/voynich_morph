@@ -8,6 +8,8 @@ from vman.apps.vnlp.training.featurizers.base_featurizer import BaseFeaturizer
 class WordMorphFeaturizer(BaseFeaturizer):
     word_freq = {}  # type: Dict[str, float]
     root_freq = {}  # type: Dict[str, float]
+    DGRAM_LENGTH = 10
+    CR_LENGTH = 4
 
     def featurize_words(self, words: List[str], corpus: CorpusFeatures) -> List[float]:
         """
@@ -35,9 +37,15 @@ class WordMorphFeaturizer(BaseFeaturizer):
         dgram = self.calc_sliding_window_density(words)
         return cw + cr + [words_p_rate, words_s_rate] + dgram
 
+    @classmethod
+    def get_feature_names(cls) -> List[str]:
+        return [f'CRw{i + 1}' for i in range(cls.CR_LENGTH)] + \
+               [f'CRr{i + 1}' for i in range(cls.CR_LENGTH)] + \
+               ['WPrate', 'WSrate'] + \
+               [f'DGram{i + 1}' for i in range(cls.DGRAM_LENGTH)]
+
     def calc_correlations(self,
-                          words: List[str],
-                          max_lag: int = 4) -> Tuple[List[float], List[float]]:
+                          words: List[str]) -> Tuple[List[float], List[float]]:
         morph_list = []  # type: List[float]
         root_list = []  # type: List[float]
         for word in words:
@@ -45,9 +53,10 @@ class WordMorphFeaturizer(BaseFeaturizer):
             r_freq = self.root_freq.get(word) or w_freq
             morph_list.append(w_freq)
             root_list.append(r_freq)
-        return self.acf(morph_list, max_lag), self.acf(root_list, max_lag)
+        return self.acf(morph_list, self.CR_LENGTH), self.acf(root_list, self.CR_LENGTH)
 
-    def calc_sliding_window_density(self, words: List[str], window=10) -> List[float]:
+    def calc_sliding_window_density(self, words: List[str]) -> List[float]:
+        window = self.DGRAM_LENGTH
         density = [0] * window
         window_dens = [0] * window
 
