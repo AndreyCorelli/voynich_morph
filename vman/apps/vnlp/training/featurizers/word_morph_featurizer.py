@@ -8,8 +8,8 @@ from vman.apps.vnlp.training.featurizers.base_featurizer import BaseFeaturizer
 class WordMorphFeaturizer(BaseFeaturizer):
     word_freq = {}  # type: Dict[str, float]
     root_freq = {}  # type: Dict[str, float]
-    DGRAM_LENGTH = 10
-    CR_LENGTH = 4
+    DGRAM_LENGTH = 12
+    CR_LENGTH = 2
 
     def featurize_words(self, words: List[str], corpus: CorpusFeatures) -> List[float]:
         """
