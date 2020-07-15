@@ -1,11 +1,11 @@
 import os
 from unittest import TestCase
 
-from vman.apps.vnlp.training.alphabet import EnAlphabet, SlavAlphabet, RuAlphabet, \
+from apps.vnlp.training.alphabet import EnAlphabet, SlavAlphabet, RuAlphabet, \
     LatinAlphabet, EvaBasicAlphabetA, GreekAlphabet, PolishAlphabet
-from vman.apps.vnlp.training.eva_processor import EvaProcessor
-from vman.apps.vnlp.training.raw_corpus_downloader import RawCorpusDownloader
-from vman.corpus.corpus_data import RAW_CORPUS_ROOT
+from apps.vnlp.training.eva_processor import EvaProcessor
+from apps.vnlp.training.raw_corpus_downloader import RawCorpusDownloader
+from corpus.corpus_data import RAW_CORPUS_ROOT
 
 
 class TestRawCorpusDownloader(TestCase):

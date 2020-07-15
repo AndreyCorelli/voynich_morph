@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
 
     'apps.vnlp',
     'apps.vgui',
@@ -60,7 +61,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'vman.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
@@ -116,7 +117,7 @@ TEMPLATES = [
 ]
 """
 
-WSGI_APPLICATION = 'vman.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 
 # Database

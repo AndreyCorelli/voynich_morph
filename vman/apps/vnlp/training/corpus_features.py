@@ -3,9 +3,9 @@ import os
 import json
 from typing import Optional, Set, Dict, List, Tuple
 
-from vman.apps.vnlp.training.alphabet import Alphabet, alphabet_by_code
-from vman.apps.vnlp.training.detailed_dictionary import DetailedDictionary, WordCard
-from vman.apps.vnlp.training.margin_ngrams import MarginNgramsCollector, MarginNgram
+from apps.vnlp.training.alphabet import Alphabet, alphabet_by_code
+from apps.vnlp.training.detailed_dictionary import DetailedDictionary, WordCard
+from apps.vnlp.training.margin_ngrams import MarginNgramsCollector, MarginNgram
 
 
 class CorpusFeatures:
@@ -120,7 +120,7 @@ class CorpusFeatures:
     def load_from_file(cls, path: str):  # CorpusFeatures
         with codecs.open(path, 'rb') as fr:
             data = json.load(fr)
-        alphabet = f'vman.apps.vnlp.training.alphabet.{data["alphabet"]}'
+        alphabet = f'apps.vnlp.training.alphabet.{data["alphabet"]}'
         cf = CorpusFeatures(data['language'], alphabet, data['path'])
         cf.version = data['version']
         cf.dictionary = DetailedDictionary.json_deserialize(data['dictionary'])

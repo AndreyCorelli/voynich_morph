@@ -1,7 +1,7 @@
 import codecs
 from typing import List, Dict, Tuple
 
-from vman.apps.vnlp.training.corpus_features import CorpusFeatures
+from apps.vnlp.training.corpus_features import CorpusFeatures
 
 
 class BaseFeaturizer:

@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from vman.apps.vgui.views import CorpusListView
+from apps.vgui.views import CorpusListView
 
 urlpatterns = [
     url(

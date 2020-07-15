@@ -1,8 +1,8 @@
 import os
 from unittest import TestCase
 
-from vman.apps.vnlp.training.detailed_dictionary import DetailedDictionary
-from vman.corpus.corpus_data import RAW_CORPUS_ROOT
+from apps.vnlp.training.detailed_dictionary import DetailedDictionary
+from corpus.corpus_data import RAW_CORPUS_ROOT
 
 
 class TestDetailedDictionary(TestCase):

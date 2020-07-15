@@ -1,7 +1,7 @@
 from typing import List
 
-from vman.apps.vnlp.training.corpus_features import CorpusFeatures
-from vman.corpus.corpus_data import CORPUS_ROOT
+from apps.vnlp.training.corpus_features import CorpusFeatures
+from corpus.corpus_data import CORPUS_ROOT
 
 
 class CorpusManager:

@@ -2,7 +2,7 @@ import os
 import codecs
 from typing import Type
 
-from vman.apps.vnlp.training.raw_text_processor import RawTextProcessor
+from apps.vnlp.training.raw_text_processor import RawTextProcessor
 
 
 class FileSplitStream:

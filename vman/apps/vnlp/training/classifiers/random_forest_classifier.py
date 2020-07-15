@@ -3,8 +3,8 @@ from typing import List
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import export_graphviz
 
-from vman.apps.vnlp.training.classifiers.base_classifier import BaseClassifier
-from vman.apps.vnlp.training.featurizers.base_featurizer import BaseFeaturizer
+from apps.vnlp.training.classifiers.base_classifier import BaseClassifier
+from apps.vnlp.training.featurizers.base_featurizer import BaseFeaturizer
 
 
 class RandomForestLangClassifier(BaseClassifier):

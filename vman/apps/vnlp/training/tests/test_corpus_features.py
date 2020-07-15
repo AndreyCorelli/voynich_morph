@@ -5,11 +5,11 @@ from typing import List, Tuple
 from unittest import TestCase
 from PIL import Image, ImageDraw
 
-from vman.apps.vnlp.training.alphabet import EnAlphabet, SlavAlphabet
-from vman.apps.vnlp.training.corpus_features import CorpusFeatures
-from vman.apps.vnlp.training.detailed_dictionary import DetailedDictionary, WordCard
-from vman.apps.vnlp.training.margin_ngrams import MarginNgramsCollector, MarginNgram
-from vman.corpus.corpus_data import RAW_CORPUS_ROOT, FEATURES_CORPUS_ROOT, CORPUS_ROOT
+from apps.vnlp.training.alphabet import EnAlphabet, SlavAlphabet
+from apps.vnlp.training.corpus_features import CorpusFeatures
+from apps.vnlp.training.detailed_dictionary import DetailedDictionary, WordCard
+from apps.vnlp.training.margin_ngrams import MarginNgramsCollector, MarginNgram
+from corpus.corpus_data import RAW_CORPUS_ROOT, FEATURES_CORPUS_ROOT, CORPUS_ROOT
 
 
 class TestCorpusFeatures(TestCase):

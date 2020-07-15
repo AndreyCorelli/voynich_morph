@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from vman.apps.vnlp.training.alphabet import EnAlphabet
-from vman.apps.vnlp.training.raw_text_processor import RawTextProcessor
+from apps.vnlp.training.alphabet import EnAlphabet
+from apps.vnlp.training.raw_text_processor import RawTextProcessor
 
 
 class TestRawTextProcessor(TestCase):

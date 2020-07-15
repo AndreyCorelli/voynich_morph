@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from vman.apps.vnlp.training.featurizers.word_morph_featurizer import WordMorphFeaturizer
-from vman.corpus.corpus_data import CORPUS_ROOT
+from apps.vnlp.training.featurizers.word_morph_featurizer import WordMorphFeaturizer
+from corpus.corpus_data import CORPUS_ROOT
 
 
 class TestWordMorphFeaturizer(TestCase):

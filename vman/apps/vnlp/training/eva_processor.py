@@ -1,7 +1,7 @@
 from typing import Generator, Type
 import regex as re
 
-from vman.apps.vnlp.training.raw_text_processor import RawTextProcessor
+from apps.vnlp.training.raw_text_processor import RawTextProcessor
 
 
 class EvaProcessor(RawTextProcessor):

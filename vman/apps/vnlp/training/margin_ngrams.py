@@ -1,8 +1,8 @@
 import json
-from typing import Dict, List, Tuple, Optional
+from typing import List, Optional
 
-from vman.apps.vnlp.training.alphabet import Alphabet
-from vman.apps.vnlp.training.detailed_dictionary import DetailedDictionary, WordCard
+from apps.vnlp.training.alphabet import Alphabet
+from apps.vnlp.training.detailed_dictionary import DetailedDictionary, WordCard
 
 
 class MarginNgram:

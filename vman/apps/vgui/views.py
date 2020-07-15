@@ -1,7 +1,7 @@
 from django.views.generic import ListView
 
-from vman.apps.vnlp.corpus_manager import CorpusManager
-from vman.apps.vnlp.training.corpus_features import CorpusFeatures
+from apps.vnlp.corpus_manager import CorpusManager
+from apps.vnlp.training.corpus_features import CorpusFeatures
 
 
 class CorpusListView(ListView):

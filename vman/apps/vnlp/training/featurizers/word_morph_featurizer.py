@@ -1,8 +1,8 @@
 from typing import List, Tuple, Dict
 from scipy.stats import pearsonr
 
-from vman.apps.vnlp.training.corpus_features import CorpusFeatures
-from vman.apps.vnlp.training.featurizers.base_featurizer import BaseFeaturizer
+from apps.vnlp.training.corpus_features import CorpusFeatures
+from apps.vnlp.training.featurizers.base_featurizer import BaseFeaturizer
 
 
 class WordMorphFeaturizer(BaseFeaturizer):
