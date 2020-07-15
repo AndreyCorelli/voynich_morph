@@ -34,7 +34,8 @@ class CorpusFeatures:
     @classmethod
     def load_from_folder(cls,
                          folder: str,
-                         ignore_cached: bool = False):  # List[CorpusFeatures]
+                         ignore_cached: bool = False,
+                         read_cached_only: bool = False):  # List[CorpusFeatures]
         """
         "folder" should have the following structure:
          - raw
@@ -79,7 +80,7 @@ class CorpusFeatures:
                             corpus = cf
                     except Exception as e:
                         print(f'Error loading "{feature_path}": {e}')
-                if not corpus:
+                if not corpus and not read_cached_only:
                     # build corpus
                     alph = alphabet_by_code[language]
                     corpus = CorpusFeatures(language, alph, full_path)

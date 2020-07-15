@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if object_list %}
+        <table id="corpus_table" class="table table-stripped table-bordered">
+            {% for cr in object_list %}
+                <tr>
+                    <td>{{ cr.language }}</td>
+                    <td>{{ cr.corpus_path }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        {% if is_paginated %}
+            <div class="pagination">
+                <span class="page-links">
+                    {% if page_obj.has_previous %}
+                        <a href="/cars?page={{ page_obj.previous_page_number }}">previous</a>
+                    {% endif %}
+                    <span class="page-current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+                    {% if page_obj.has_next %}
+                        <a href="/cars?page={{ page_obj.next_page_number }}">next</a>
+                    {% endif %}
+                </span>
+            </div>
+        {% endif %}
+    {% else %}
+        <h3>Corpus data</h3>
+        <p>No data found</p>
+    {% endif %}
+{% endblock %}
