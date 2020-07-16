@@ -2,6 +2,7 @@ from django.views.generic import ListView
 
 from apps.vnlp.corpus_manager import CorpusManager
 from apps.vnlp.training.corpus_features import CorpusFeatures
+from corpus.corpus_data import CORPUS_ROOT
 
 
 class CorpusListView(ListView):
@@ -11,7 +12,7 @@ class CorpusListView(ListView):
     paginate_by = 10
 
     def get(self, request, *args, **kwargs):
-        self.object_list = CorpusManager.read_corpus_by_text(False, True)
+        self.object_list = CorpusManager.read_corpus_by_lang(CORPUS_ROOT, False, False)
         context = {
             'paginator': None,
             'page_obj': None,

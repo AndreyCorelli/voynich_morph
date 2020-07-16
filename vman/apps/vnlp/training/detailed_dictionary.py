@@ -27,12 +27,14 @@ class DetailedDictionary:
     def __init__(self):
         self.words = []  # type:List[WordCard]
         self.words_total = 0
+        self.words_processed = 0
+        self.files_processed = 0
 
     @classmethod
     def read_from_file(cls, file_path: str):  # DetailedDictionary
         dd = DetailedDictionary()
         word_count = {}  # type: Dict[str, int]
-        cls.read_file(file_path, word_count)
+        dd.read_file(file_path, word_count)
         dd.build_word_cards(word_count)
         return dd
 
@@ -45,7 +47,7 @@ class DetailedDictionary:
             full_path = os.path.join(corpus_folder, file_name)
             if not os.path.isfile(full_path) or not file_name.endswith('.txt'):
                 continue
-            cls.read_file(full_path, word_count)
+            dd.read_file(full_path, word_count)
         dd.build_word_cards(word_count)
         return dd
 
@@ -55,19 +57,24 @@ class DetailedDictionary:
             self.words.append(WordCard(w, word_count[w]))
         self.words.sort(key=lambda w: w.word)
 
-    @classmethod
-    def read_file(cls, file_path: str, word_count: Dict[str, int]):
+    def read_file(self, file_path: str, word_count: Dict[str, int]):
         with codecs.open(file_path, 'r', encoding='utf-8') as fr:
             text = fr.read()
         words = text.split(' ')
         for w in words:
             if not w:
                 continue
+            self.words_processed += 1
             count = word_count.get(w) or 0
             word_count[w] = count + 1
+        self.files_processed += 1
 
     def json_serialize(self) -> str:
-        data = {w.word: {
+        data = {
+            'files_processed': self.files_processed,
+            'words_processed': self.words_processed
+        }
+        data['words'] = {w.word: {
             'root': w.root,
             'prefix': w.prefix or '',
             'suffix': w.suffix or '',
@@ -80,11 +87,16 @@ class DetailedDictionary:
     def json_deserialize(cls, data_str: str):  # DetailedDictionary
         dd = DetailedDictionary()
         data = json.loads(data_str)
-        for wrd in data:
-            word = WordCard(wrd, data[wrd]['count'], data[wrd]['root'])
-            word.prefix = data[wrd]['prefix']
-            word.suffix = data[wrd]['suffix']
-            word.root_count = data[wrd]['root_count']
+
+        dd.files_processed = data['files_processed']
+        dd.words_processed = data['words_processed']
+
+        words_data = data['words']
+        for wrd in words_data:
+            word = WordCard(wrd, words_data[wrd]['count'], words_data[wrd]['root'])
+            word.prefix = words_data[wrd]['prefix']
+            word.suffix = words_data[wrd]['suffix']
+            word.root_count = words_data[wrd]['root_count']
             dd.words.append(word)
         dd.words_total = len(dd.words)
         return dd

@@ -1,8 +1,8 @@
 import random
 from unittest import TestCase
 
+from apps.vnlp.corpus_manager import CorpusManager
 from apps.vnlp.training.classifiers.random_forest_classifier import RandomForestLangClassifier
-from apps.vnlp.training.corpus_features import CorpusFeatures
 from apps.vnlp.training.featurizers.word_morph_featurizer import WordMorphFeaturizer
 from corpus.corpus_data import CORPUS_ROOT
 
@@ -13,13 +13,13 @@ random.seed(1)
 class TestRandomForestClassifier(TestCase):
     def test_split(self):
         clsf = RandomForestLangClassifier(WordMorphFeaturizer())
-        all_records = CorpusFeatures.load_from_folder(CORPUS_ROOT)
+        all_records = CorpusManager.read_corpus_by_text(CORPUS_ROOT)
         train, test = clsf.split_train_test(all_records)
         self.assertEqual(len(all_records), len(train) + len(test))
 
     def test_train_predict(self):
         clsf = RandomForestLangClassifier(WordMorphFeaturizer())
-        all_records = CorpusFeatures.load_from_folder(CORPUS_ROOT)
+        all_records = CorpusManager.read_corpus_by_text(CORPUS_ROOT)
         all_records = [r for r in all_records if r.language != 'eba']
         train, test = clsf.split_train_test(all_records)
         lang_id = RandomForestLangClassifier.encode_languages(all_records)
@@ -38,7 +38,7 @@ class TestRandomForestClassifier(TestCase):
         v_langs = {'eba'}
 
         clsf = RandomForestLangClassifier(WordMorphFeaturizer())
-        all_records = CorpusFeatures.load_from_folder(CORPUS_ROOT)
+        all_records = CorpusManager.read_corpus_by_text(CORPUS_ROOT)
         train = [r for r in all_records if r.language not in v_langs]
         test = [r for r in all_records if r.language in v_langs]
 

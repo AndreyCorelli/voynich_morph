@@ -26,26 +26,32 @@ class Alphabet:
 
 
 class EnAlphabet(Alphabet):
+    title = 'English'
     pass
 
 
 class RuAlphabet(Alphabet):
+    title = 'Russian'
     reg_word = re.compile(r'[абвгдеёжзийклмнопрстуфхцчшщъыьэюя]+')
 
 
 class SlavAlphabet(Alphabet):
+    title = 'Slavic'
     reg_word = re.compile(r'[абвгдеёжзийклмнопрстуфхцчшщъыьэюяѣi]+')
 
 
 class PolishAlphabet(Alphabet):
+    title = 'Polish'
     reg_word = re.compile(r'[aąbcćdeęfghijklłmnńoóprsśtuwyzźż]+')
 
 
 class LatinAlphabet(Alphabet):
+    title = 'Latin'
     reg_word = re.compile(r'[abcdeffhiklmnopqrstvxyz]+')
 
 
 class GreekAlphabet(Alphabet):
+    title = 'Greek'
     regular_letters = 'αβγδεζηθικλμνξοπρςστυφχψω'
     reg_word = re.compile(r'[αβγδεζηθικλμνξοπρςστυφχψωϊϋἀἁἂἃἄἅἆἐἑἓἔἕἠἡἢἣἤἥἦἧἰἱἳἴἵἶἷὀὁὂὃὄὅὐὑὒὓὔὕὖὗὠὡὢὣὤὥὦὧὰάὲέὴήὶίὸόὺύὼώᾄᾐᾔᾖᾗᾠᾤᾧᾳᾴᾶᾷῃῄῆῇῒΐῖῥῦῳῴῶῷ]+')
     symbol_map = {
@@ -74,6 +80,7 @@ class GreekAlphabet(Alphabet):
 
 
 class EvaBasicAlphabetA(Alphabet):
+    title = 'EVA (A)'
     reg_word = re.compile(r'[\*\'abcdefghijklmnopqrstuvxyz]+')
 
 
