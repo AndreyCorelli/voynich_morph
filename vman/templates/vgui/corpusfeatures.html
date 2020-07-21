@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+    <table>
+        <tr>
+            <td>
+                <div id="corpus_a">
+                </div>
+            </td>
+            <td>
+                <div id="corpus_b">
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+{% endblock %}
+
+{% block js_extra %}
+<script type="text/javascript">
+    $(function() {
+        window.manager = new CorpusComparer();
+    });
+
+    function CorpusComparer() {
+        this.corpusPaths = {};
+        this.setupCorpusCombo();
+    }
+
+    CorpusComparer.prototype.setupCorpusCombo = function() {
+        var that = this;
+        $.ajax({
+            type: 'POST',
+            data: {'list': true},
+            success: function(data) {
+                that.corpusPaths = data;
+                that.addComboboxOptions('corpus_a');
+                that.addComboboxOptions('corpus_b');
+            },
+            dataType: 'json'
+        });
+    }
+
+    CorpusComparer.prototype.addComboboxOptions = function(selector) {
+        console.log(selector);
+        console.log(this.corpusPaths);
+    }
+</script>
+{% endblock %}

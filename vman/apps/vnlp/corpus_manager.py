@@ -1,5 +1,5 @@
 import os
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from apps.vnlp.training.alphabet import alphabet_by_code
 from apps.vnlp.training.corpus_features import CorpusFeatures
@@ -70,6 +70,7 @@ class CorpusManager:
                     corpus.save_to_file(feature_path)
 
                 if corpus:
+                    corpus.cache_file_path = feature_path
                     data.append(corpus)
         return data
 
@@ -118,6 +119,39 @@ class CorpusManager:
                 corpus.build(dict)
                 # cache corpus
                 corpus.save_to_file(feature_path)
+
             if corpus:
+                corpus.multifile = True
+                corpus.cache_file_path = feature_path
                 data.append(corpus)
         return data
+
+    @classmethod
+    def get_cached_corpus_by_path(cls,
+                                  path: str) -> CorpusFeatures:
+        return CorpusFeatures.load_from_file(path)
+
+    @classmethod
+    def get_cached_corpus_file_paths(cls,
+                                     folder: str = CORPUS_ROOT) -> List[Tuple[str, str]]:
+        paths = []  # type: List[Tuple[str, str]]
+        features_path = os.path.join(folder, 'features')
+        if not os.path.isdir(features_path):
+            return []
+
+        files = [f for f in os.listdir(features_path)]
+        for file_name in files:
+            file_path = os.path.join(features_path, file_name)
+            if os.path.isfile(file_path):
+                # corpus by language features file
+                if file_path.endswith('json'):
+                    paths.append((file_path, '',))
+                continue
+            if os.path.isdir(file_path):
+                sub_files = [f for f in os.listdir(file_path)]
+                for sub_file_name in sub_files:
+                    sub_file_path = os.path.join(file_path, sub_file_name)
+                    if os.path.isfile(sub_file_path):
+                        if sub_file_path.endswith('json'):
+                            paths.append((sub_file_path, file_name,))
+        return paths

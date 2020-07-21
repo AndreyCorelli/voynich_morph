@@ -12,7 +12,7 @@
             {% for cr in object_list %}
                 <tr>
                     <td>{{ cr.language_title }}</td>
-                    <td>{{ cr.corpus_path }}</td>
+                    <td><a href="/{{cr.url}}">{{ cr.corpus_path }}</a></td>
                     <td>{{ cr.dictionary.files_processed }}</td>
                     <td>{{ cr.dictionary.words_processed }}</td>
                 </tr>

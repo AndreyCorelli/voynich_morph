@@ -22,6 +22,8 @@ class CorpusFeatures:
         self.dictionary = None  # type: Optional[DetailedDictionary]
         self.ngrams_collector = None  # type: Optional[MarginNgramsCollector]
         self.all_words = set()  # type: Set[str]
+        self.multifile = False
+        self.cache_file_path = ''
 
     def __repr__(self):
         corp_file = self.corpus_path or ''

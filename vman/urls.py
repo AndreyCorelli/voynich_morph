@@ -24,7 +24,6 @@ import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^vgui/corpus/', include('apps.vgui.urls'))
-    #url(r'^{0}$'.format(settings.BASE_URL), TemplateView.as_view(template_name='home.html'), name='home'),
 ]
 
 
