@@ -1,3 +1,4 @@
+import os
 import urllib.parse
 
 from django import forms
@@ -5,6 +6,7 @@ from django.http import JsonResponse
 from django.views.generic import ListView, TemplateView, FormView
 
 from apps.vnlp.corpus_manager import CorpusManager
+from apps.vnlp.training.alphabet import alphabet_by_code
 from apps.vnlp.training.corpus_features import CorpusFeatures
 from corpus.corpus_data import CORPUS_ROOT
 
@@ -46,7 +48,26 @@ class CorpusCompareView(FormView):
 
     def read_corpus_paths(self):
         file_paths = CorpusManager.get_cached_corpus_file_paths()
+        discrete_paths = {}
+        path_by_language = {}
+        for p, l in file_paths:
+            if not l:
+                lang_name = os.path.splitext(os.path.basename(p))[0]
+                path_by_language[lang_name] = p
+                continue
+            paths_list = discrete_paths.get(l)
+            if not paths_list:
+                paths_list = []
+                discrete_paths[l] = paths_list
+            paths_list.append((os.path.basename(p), p,))
+
+        language_title = {l: alphabet_by_code[l].title for l in alphabet_by_code}
+
+        for l in discrete_paths:
+            discrete_paths[l].sort(key=lambda p: p[0])
+
         return {
-            'discrete_paths': [(p, l,) for p, l in file_paths if l],
-            'language_paths': [(p, l,) for p, l in file_paths if not l]
+            'discrete_paths': discrete_paths,
+            'language_title': language_title,
+            'path_by_language': path_by_language
         }

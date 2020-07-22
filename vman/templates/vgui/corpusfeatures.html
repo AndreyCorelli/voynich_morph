@@ -2,6 +2,7 @@
 
 {% block content %}
 <div>
+    <button onclick="window.manager.loadCorpus();">&nbsp;LOAD CORPUS&nbsp;</button>
     <table>
         <tr>
             <td>
@@ -28,6 +29,10 @@
         this.setupCorpusCombo();
     }
 
+    CorpusComparer.prototype.loadCorpus = function() {
+
+    }
+
     CorpusComparer.prototype.setupCorpusCombo = function() {
         var that = this;
         $.ajax({
@@ -43,8 +48,29 @@
     }
 
     CorpusComparer.prototype.addComboboxOptions = function(selector) {
-        console.log(selector);
-        console.log(this.corpusPaths);
+        var markup = 'LANGUAGE: <select name="languageSelector" onchange="window.manager.languageSelected(\'' +
+            selector + '\')">\n';
+        for (var lang in this.corpusPaths.path_by_language) {
+            var langName = this.corpusPaths.language_title[lang];
+            markup += '  <option value="' + lang + '">' + langName + '</option>\n';
+        }
+        markup += '</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+        markup += 'TEXT: <select name="textSelector"></select>';
+
+        $('#' + selector).html(markup);
+        $('#' + selector + ' select[name="languageSelector"]').get()[0].dispatchEvent(new Event('change'));
+    }
+
+    CorpusComparer.prototype.languageSelected = function(selector) {
+        var lang = $('#' + selector + ' select[name="languageSelector"]').val();
+        var markup = '<select name="textSelector">\n';
+
+        var paths = this.corpusPaths.discrete_paths[lang];
+        for (var i = 0; i < paths.length; i++) {
+            markup += '  <option value="' + paths[i][1] + '">' + paths[i][0] + '</option>\n';
+        }
+        markup += '</select>';
+        $('#' + selector + ' select[name="textSelector"]').replaceWith(markup);
     }
 </script>
 {% endblock %}
