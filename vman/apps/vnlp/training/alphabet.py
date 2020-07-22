@@ -86,7 +86,7 @@ class EvaBasicAlphabetA(Alphabet):
 
 alphabet_by_code = {
     'en': EnAlphabet,
-    'ru': SlavAlphabet,
+    'ru': RuAlphabet,
     'slav': SlavAlphabet,
     'polsky': PolishAlphabet,
     'lat': LatinAlphabet,
