@@ -1,3 +1,4 @@
+import json
 import os
 import urllib.parse
 
@@ -5,6 +6,7 @@ from django import forms
 from django.http import JsonResponse
 from django.views.generic import ListView, TemplateView, FormView
 
+from apps.vgui.models.corpus_brief import CorpusBrief
 from apps.vnlp.corpus_manager import CorpusManager
 from apps.vnlp.training.alphabet import alphabet_by_code
 from apps.vnlp.training.corpus_features import CorpusFeatures
@@ -41,10 +43,18 @@ class CorpusCompareView(FormView):
         data = {}
         if 'list' in request.POST:
             data = self.read_corpus_paths()
-        return JsonResponse(data)
+        elif 'corpus_path' in request.POST:
+            data = self.read_corpus_brief(request.POST['corpus_path']).to_dict()
+        return JsonResponse(data, safe=False)
 
     def form_valid(self, form):
         return True
+
+    def read_corpus_brief(self, corpus_path: str):
+        features = CorpusManager.get_cached_corpus_by_path(corpus_path)
+        brief = CorpusBrief()
+        brief.build_from_corpus(features)
+        return brief
 
     def read_corpus_paths(self):
         file_paths = CorpusManager.get_cached_corpus_file_paths()

@@ -6,16 +6,30 @@
     <table>
         <tr>
             <td>
-                <div id="corpus_a">
+                <div id="corpus_a" class="corpus_data corpus_empty">
                 </div>
             </td>
             <td>
-                <div id="corpus_b">
+                <div id="corpus_b" class="corpus_data corpus_empty">
                 </div>
             </td>
         </tr>
     </table>
 </div>
+{% endblock %}
+
+{% block css_extra %}
+<style type="text/css">
+    .corpus_data {
+        padding: 8px;
+    }
+    .corpus_empty {
+        color: #aaa;
+    }
+
+    .corpus_loaded {
+    }
+</style>
 {% endblock %}
 
 {% block js_extra %}
@@ -25,12 +39,79 @@
     });
 
     function CorpusComparer() {
+        this.containerIds = ['corpus_a', 'corpus_b'];
         this.corpusPaths = {};
         this.setupCorpusCombo();
+        this.corpuses = [null, null]
     }
 
     CorpusComparer.prototype.loadCorpus = function() {
+        var that = this;
+        [0, 1].forEach(function(corpusId) {
+            var containerId = that.containerIds[corpusId];
+            $('#' + containerId).removeClass('corpus_loaded');
+            $('#' + containerId).addClass('corpus_empty');
 
+            var corpusPath = $('#' + containerId + ' select[name="textSelector"]').val();
+            $.ajax({
+                type: 'POST',
+                data: {'corpus_path': corpusPath},
+                success: function(data) {
+                    that.corpuses[corpusId] = data;
+                    that.renderCorpus(corpusId);
+                },
+                dataType: 'json'
+            });
+        });
+    }
+
+    CorpusComparer.prototype.renderCorpus = function (corpusId) {
+        var containerId = this.containerIds[corpusId];
+        $('#' + containerId).addClass('corpus_loaded');
+        $('#' + containerId).removeClass('corpus_empty');
+
+        var corpusData = this.corpuses[corpusId];
+        var markup = 'by: <select name="wordsBy" ' +
+            'onchange="window.manager.updateWordsTopTable(' + corpusId + ')">/n' +
+            '  <option value="morph">word</option>\n' +
+            '  <option value="root">root</option>\n' +
+            '</select> &nbsp;&nbsp;&nbsp;&nbsp;\n';
+        markup += 'min length: <select name="minLength" ' +
+            'onchange="window.manager.updateWordsTopTable(' + corpusId + ')">/n';
+        window.cdd = corpusData;
+        for (var wordLen in corpusData['words_by_morph']) {
+            markup += '  <option value="' + wordLen + '">' + wordLen + '</option>\n';
+        }
+        markup += '</select>\n';
+        markup += '<div name="tableContainer"></div>\n';
+
+        $('#' + containerId + ' div[name="wordTopTable"]').html(markup);
+        $('#' + containerId + ' select[name="minLength"]').get()[0].dispatchEvent(new Event('change'));
+    }
+
+    CorpusComparer.prototype.updateWordsTopTable = function (corpusId) {
+        var containerId = this.containerIds[corpusId];
+        var topSource = $('#' + containerId + ' select[name="wordsBy"]').val();
+        var topMinLen = $('#' + containerId + ' select[name="minLength"]').val();
+
+        var corpusData = this.corpuses[corpusId];
+        var wordsAll = topSource == 'morph' ? corpusData['words_by_morph'] : corpusData['words_by_root'];
+        var wordsArray = wordsAll[topMinLen];
+        // [ [word, root, preffix, suffix, count], ... ]
+        // [ ["this", "thi", "", "s", 118], ... ]
+        var markup = '<table class="table table-bordered table-stripped">\n' +
+            '  <tr><th>Word</th><th>Count</th><th>Frequency</th></tr>\n';
+        for (var i = 0; i < wordsArray.length; i++) {
+            var wrd = wordsArray[i];
+            var wrdMarkup = wrd[2] + '<span style="color:blue">' + wrd[1] + '</span>' + wrd[3];
+            var wrdShare = wrd[4] * 100.0 / corpusData['words_total'];
+            wrdShare = Math.round(wrdShare*1000)/1000;
+            markup += '  <tr><td>' + wrdMarkup + '</td>' +
+                '<td>' + wrd[4] + '</td>' +
+                '<td>' + wrdShare + '%</td></tr>\n';
+        }
+        markup += '</table>';
+        $('#' + containerId + ' div[name="tableContainer"]').html(markup);
     }
 
     CorpusComparer.prototype.setupCorpusCombo = function() {
@@ -40,8 +121,8 @@
             data: {'list': true},
             success: function(data) {
                 that.corpusPaths = data;
-                that.addComboboxOptions('corpus_a');
-                that.addComboboxOptions('corpus_b');
+                that.addComboboxOptions(that.containerIds[0]);
+                that.addComboboxOptions(that.containerIds[1]);
             },
             dataType: 'json'
         });
@@ -55,7 +136,8 @@
             markup += '  <option value="' + lang + '">' + langName + '</option>\n';
         }
         markup += '</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-        markup += 'TEXT: <select name="textSelector"></select>';
+        markup += 'TEXT: <select name="textSelector"></select>\n';
+        markup += '<div name="wordTopTable"></div>';
 
         $('#' + selector).html(markup);
         $('#' + selector + ' select[name="languageSelector"]').get()[0].dispatchEvent(new Event('change'));
@@ -66,6 +148,8 @@
         var markup = '<select name="textSelector">\n';
 
         var paths = this.corpusPaths.discrete_paths[lang];
+        var summaryCorpusPath = this.corpusPaths.path_by_language[lang];
+        markup += '  <option value="' + summaryCorpusPath + '"> SUMMARY </option>\n';
         for (var i = 0; i < paths.length; i++) {
             markup += '  <option value="' + paths[i][1] + '">' + paths[i][0] + '</option>\n';
         }
