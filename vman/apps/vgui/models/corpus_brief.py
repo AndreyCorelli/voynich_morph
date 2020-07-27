@@ -9,12 +9,14 @@ class CorpusBrief:
         self.words_by_morph = {}  # type: Dict[int, List[Tuple[str, str, str, str, int]]]
         self.words_by_root = {}  # type: Dict[int, List[Tuple[str, str, str, str, int]]]
         self.words_total = 0
+        self.word_grams = {}  # type: Dict[int, List[str, int]]
 
     def to_dict(self):
         return {
             'words_by_morph': self.words_by_morph,
             'words_by_root': self.words_by_root,
-            'words_total': self.words_total
+            'words_total': self.words_total,
+            'word_grams': self.word_grams
         }
 
     def build_from_corpus(self, f: CorpusFeatures):
@@ -44,3 +46,13 @@ class CorpusBrief:
                     if len(wrd_list) == top_count:
                         break
 
+        for wg_len, wg in f.dictionary.word_grams:
+            ngr_dict = self.word_grams.get(wg_len)
+            if not ngr_dict:
+                ngr_dict = []
+                self.word_grams[wg_len] = ngr_dict
+            ngr_dict.append((wg, f.dictionary.word_grams[(wg_len, wg,)],))
+
+        for wg_len in self.word_grams:
+            self.word_grams[wg_len].sort(key=lambda w: -w[1])
+            self.word_grams[wg_len] = self.word_grams[wg_len][:30]

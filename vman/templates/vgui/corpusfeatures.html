@@ -5,11 +5,11 @@
     <button onclick="window.manager.loadCorpus();">&nbsp;LOAD CORPUS&nbsp;</button>
     <table>
         <tr>
-            <td>
+            <td valign="top">
                 <div id="corpus_a" class="corpus_data corpus_empty">
                 </div>
             </td>
-            <td>
+            <td valign="top">
                 <div id="corpus_b" class="corpus_data corpus_empty">
                 </div>
             </td>
@@ -20,6 +20,15 @@
 
 {% block css_extra %}
 <style type="text/css">
+    table.table-condensed td {
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
+
+    table.table-condensed tr:nth-child(odd) {
+        background-color: #f7f7f7;
+    }
+
     .corpus_data {
         padding: 8px;
     }
@@ -72,12 +81,12 @@
 
         var corpusData = this.corpuses[corpusId];
         var markup = 'by: <select name="wordsBy" ' +
-            'onchange="window.manager.updateWordsTopTable(' + corpusId + ')">/n' +
+            'onchange="window.manager.updateWordsTopTable(' + corpusId + ')">\n' +
             '  <option value="morph">word</option>\n' +
             '  <option value="root">root</option>\n' +
             '</select> &nbsp;&nbsp;&nbsp;&nbsp;\n';
         markup += 'min length: <select name="minLength" ' +
-            'onchange="window.manager.updateWordsTopTable(' + corpusId + ')">/n';
+            'onchange="window.manager.updateWordsTopTable(' + corpusId + ')">\n';
         window.cdd = corpusData;
         for (var wordLen in corpusData['words_by_morph']) {
             markup += '  <option value="' + wordLen + '">' + wordLen + '</option>\n';
@@ -85,8 +94,18 @@
         markup += '</select>\n';
         markup += '<div name="tableContainer"></div>\n';
 
+        markup += '<br/>word ngrams length: <select name="ngramsFrom" ' +
+            'onchange="window.manager.updateNgramsTable(' + corpusId + ')">\n';
+        for (var wordLen in corpusData['word_grams']) {
+            markup += '  <option value="' + wordLen + '">' + wordLen + '</option>\n';
+        }
+        markup += '</select>\n';
+        markup += '<div name="tableNgramContainer"></div>\n';
+        console.log(markup);
+
         $('#' + containerId + ' div[name="wordTopTable"]').html(markup);
         $('#' + containerId + ' select[name="minLength"]').get()[0].dispatchEvent(new Event('change'));
+        $('#' + containerId + ' select[name="ngramsFrom"]').get()[0].dispatchEvent(new Event('change'));
     }
 
     CorpusComparer.prototype.updateWordsTopTable = function (corpusId) {
@@ -99,7 +118,7 @@
         var wordsArray = wordsAll[topMinLen];
         // [ [word, root, preffix, suffix, count], ... ]
         // [ ["this", "thi", "", "s", 118], ... ]
-        var markup = '<table class="table table-bordered table-stripped">\n' +
+        var markup = '<table class="table table-bordered table-stripped table-condensed">\n' +
             '  <tr><th>Word</th><th>Count</th><th>Frequency</th></tr>\n';
         for (var i = 0; i < wordsArray.length; i++) {
             var wrd = wordsArray[i];
@@ -112,6 +131,28 @@
         }
         markup += '</table>';
         $('#' + containerId + ' div[name="tableContainer"]').html(markup);
+    }
+
+    CorpusComparer.prototype.updateNgramsTable = function (corpusId) {
+        var containerId = this.containerIds[corpusId];
+        var ngramLen = $('#' + containerId + ' select[name="ngramsFrom"]').val();
+        var corpusData = this.corpuses[corpusId];
+        var ngrams = corpusData.word_grams[ngramLen];
+        // [ ["these are", 12], ["are not", 11], ... ]
+        var wrdTotal = corpusData['words_total'] + 1 - ngramLen;
+
+        var markup = '<table class="table table-bordered table-stripped table-condensed">\n' +
+            '  <tr><th>Ngram</th><th>Count</th><th>Frequency</th></tr>\n';
+        for (var i = 0; i < ngrams.length; i++) {
+            var wrd = ngrams[i][0];
+            var wrdShare = ngrams[i][1] * 100.0 / wrdTotal;
+            wrdShare = Math.round(wrdShare*1000)/1000;
+            markup += '  <tr><td>' + wrd + '</td>' +
+                '<td>' + ngrams[i][1] + '</td>' +
+                '<td>' + wrdShare + '%</td></tr>\n';
+        }
+        markup += '</table>';
+        $('#' + containerId + ' div[name="tableNgramContainer"]').html(markup);
     }
 
     CorpusComparer.prototype.setupCorpusCombo = function() {

@@ -1,7 +1,7 @@
 import json
 import os
 import codecs
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 
 class WordCard:
@@ -24,11 +24,15 @@ class WordCard:
 
 
 class DetailedDictionary:
+    MIN_WORD_GRAM_COUNT = 20
+
     def __init__(self):
         self.words = []  # type:List[WordCard]
         self.words_total = 0
         self.words_processed = 0
         self.files_processed = 0
+        # {(3, 'so be it'): 19} - words, words count, occurrences
+        self.word_grams = {}  # type: Dict[Tuple[int, str], int]
 
     @classmethod
     def read_from_file(cls, file_path: str):  # DetailedDictionary
@@ -61,18 +65,36 @@ class DetailedDictionary:
         with codecs.open(file_path, 'r', encoding='utf-8') as fr:
             text = fr.read()
         words = text.split(' ')
+
+        cur_ngrams = [[2, []], [3, []]]
         for w in words:
             if not w:
                 continue
+            for ngram_len, ngram in cur_ngrams:
+                ngram.append(w)
+                if len(ngram) < ngram_len:
+                    continue
+                elif len(ngram) > ngram_len:
+                    ngram.pop(0)
+                ngrstr = ' '.join(ngram)
+                ngr_key = (ngram_len, ngrstr,)
+                ngr_item = self.word_grams.get(ngr_key)
+                if not ngr_item:
+                    self.word_grams[ngr_key] = 1
+                else:
+                    self.word_grams[ngr_key] = ngr_item + 1
             self.words_processed += 1
             count = word_count.get(w) or 0
             word_count[w] = count + 1
         self.files_processed += 1
 
     def json_serialize(self) -> str:
+        ngrams_selected = {k[1]: self.word_grams[k] for k in self.word_grams
+                           if self.word_grams[k] > self.MIN_WORD_GRAM_COUNT}
         data = {
             'files_processed': self.files_processed,
-            'words_processed': self.words_processed
+            'words_processed': self.words_processed,
+            'word_grams': ngrams_selected
         }
         data['words'] = {w.word: {
             'root': w.root,
@@ -90,6 +112,11 @@ class DetailedDictionary:
 
         dd.files_processed = data['files_processed']
         dd.words_processed = data['words_processed']
+        word_grams = data['word_grams']
+        for wg in word_grams:
+            wg_len = sum([1 for c in wg if c == ' ']) + 1
+            wg_key = (wg_len, wg,)
+            dd.word_grams[wg_key] = word_grams[wg]
 
         words_data = data['words']
         for wrd in words_data:
