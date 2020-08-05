@@ -17,3 +17,4 @@ sklearn==0.0
 sqlparse==0.3.1
 threadpoolctl==2.1.0
 tqdm==4.47.0
+transliterate==1.10.2

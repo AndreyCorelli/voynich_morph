@@ -12,7 +12,8 @@ class CorpusManager:
     def read_corpus_by_text(cls,
                             folder: str = CORPUS_ROOT,
                             ignore_cached: bool = False,
-                            read_cached_only: bool = False) -> List[CorpusFeatures]:
+                            read_cached_only: bool = False,
+                            file_name_only: str = '') -> List[CorpusFeatures]:
         """
         "folder" should have the following structure:
          - raw
@@ -41,6 +42,8 @@ class CorpusManager:
             language = dir_name  # now we somwhere like '.../raw/fr/'
             files = [f for f in os.listdir(sub_path)]
             for file_name in files:
+                if file_name_only and file_name != file_name_only:
+                    continue
                 full_path = os.path.join(sub_path, file_name)  # '.../raw/fr/file01.txt'
                 if not os.path.isfile(full_path) or not file_name.endswith('.txt'):
                     continue

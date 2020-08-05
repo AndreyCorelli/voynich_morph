@@ -24,7 +24,7 @@ class WordCard:
 
 
 class DetailedDictionary:
-    MIN_WORD_GRAM_COUNT = 20
+    NGRAMS_TO_STORE = 100
 
     def __init__(self):
         self.words = []  # type:List[WordCard]
@@ -89,8 +89,9 @@ class DetailedDictionary:
         self.files_processed += 1
 
     def json_serialize(self) -> str:
-        ngrams_selected = {k[1]: self.word_grams[k] for k in self.word_grams
-                           if self.word_grams[k] > self.MIN_WORD_GRAM_COUNT}
+        ordered_ngrams = [(w[0], w[1], self.word_grams[w],) for w in self.word_grams]
+        ordered_ngrams.sort(key=lambda w: -w[2])
+        ngrams_selected = {k[1]: k[2] for k in ordered_ngrams[:self.NGRAMS_TO_STORE]}
         data = {
             'files_processed': self.files_processed,
             'words_processed': self.words_processed,
