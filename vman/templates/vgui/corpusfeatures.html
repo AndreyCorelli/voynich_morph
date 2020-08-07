@@ -101,11 +101,33 @@
         }
         markup += '</select>\n';
         markup += '<div name="tableNgramContainer"></div>\n';
-        console.log(markup);
+        markup += '<br/><br/><br/>';
+        markup += this.getSmbFrequencyTableMarkup(corpusId);
 
         $('#' + containerId + ' div[name="wordTopTable"]').html(markup);
         $('#' + containerId + ' select[name="minLength"]').get()[0].dispatchEvent(new Event('change'));
         $('#' + containerId + ' select[name="ngramsFrom"]').get()[0].dispatchEvent(new Event('change'));
+    }
+
+    CorpusComparer.prototype.getSmbFrequencyTableMarkup = function (corpusId) {
+        var markup = '<div name="tableSymbolFrequency">\n<table class="table ' +
+            'table-bordered table-stripped table-condensed">\n';
+        markup += '  <tr><th>SMB</th> <th>%</th> <th>SMB</th> <th>%</th></tr>\n';
+        var corpusData = this.corpuses[corpusId];
+        var smbFreq = corpusData['symbol_frequency'];
+        var tabH = Math.ceil(smbFreq.length / 2);
+        for (var h = 0; h < tabH; h++) {
+            var smb1 = smbFreq[h * 2];
+            var smb2 = h * 2 + 1 == smbFreq.length ? null : smbFreq[h * 2 + 1];
+            var s1 = smb1[0];
+            var s2 = smb2 ? smb2[0] : '';
+            var f1 = (Math.round(smb1[1] * 1000) / 1000).toString() + '%';
+            var f2 = smb2 ? (Math.round(smb2[1] * 1000) / 1000).toString() + '%' : '';
+            markup += '  <tr><td>' + s1 + '</td><td>' + f1 + '</td>';
+            markup += '<td>' + s2 + '</td><td>' + f2 + '</td></tr>\n';
+        }
+        markup += '</table>\n</div>';
+        return markup;
     }
 
     CorpusComparer.prototype.updateWordsTopTable = function (corpusId) {
