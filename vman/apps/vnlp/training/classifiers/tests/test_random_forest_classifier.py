@@ -45,7 +45,7 @@ class TestRandomForestClassifier(TestCase):
         lang_id = RandomForestLangClassifier.encode_languages(train)
         id_lang = {lang_id[l]: l for l in lang_id}
 
-        clsf.train_on_files(train, all_records)
+        clsf.train_on_files(train, train)
         test_classes = clsf.classify_vector(test)[0]
         m_index, mval = 0, 0
         for i in range(len(test_classes)):
