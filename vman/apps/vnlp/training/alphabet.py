@@ -47,7 +47,7 @@ class PolishAlphabet(Alphabet):
 
 class LatinAlphabet(Alphabet):
     title = 'Latin'
-    reg_word = re.compile(r'[abcdeffhiklmnopqrstvxyz]+')
+    reg_word = re.compile(r'[abcdefghiklmnopqrstuvxyz]+')
 
 
 class GreekAlphabet(Alphabet):
