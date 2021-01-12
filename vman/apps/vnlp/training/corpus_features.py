@@ -9,7 +9,7 @@ from apps.vnlp.training.margin_ngrams import MarginNgramsCollector, MarginNgram
 
 
 class CorpusFeatures:
-    ACTUAL_VERSION = '1.2'
+    ACTUAL_VERSION = '1.3'
 
     def __init__(self,
                  language: str,

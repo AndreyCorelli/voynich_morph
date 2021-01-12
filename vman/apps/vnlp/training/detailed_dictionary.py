@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import codecs
 from typing import List, Dict, Tuple
@@ -14,6 +15,8 @@ class WordCard:
         self.count = count
         # count of the words with the same root (root_count >= count)
         self.root_count = 1
+        # mean square distance between word occurrences
+        self.mean_sq_distance = 0.0
 
     def __repr__(self):
         pr = self.prefix + ']' if self.prefix else ''
@@ -29,6 +32,7 @@ class DetailedDictionary:
     def __init__(self):
         self.words = []  # type:List[WordCard]
         self.words_total = 0
+        self.words_in_text = 0
         self.words_processed = 0
         self.files_processed = 0
         # {(3, 'so be it'): 19} - words, words count, occurrences
@@ -46,7 +50,7 @@ class DetailedDictionary:
     def read_from_folder(cls, corpus_folder: str):  # DetailedDictionary
         dd = DetailedDictionary()
         files = [f for f in os.listdir(corpus_folder)]
-        word_count = {}  # type: Dict[str, int]
+        word_count = {}  # type: Dict[str, WordCard]
         for file_name in files:
             full_path = os.path.join(corpus_folder, file_name)
             if not os.path.isfile(full_path) or not file_name.endswith('.txt'):
@@ -55,13 +59,17 @@ class DetailedDictionary:
         dd.build_word_cards(word_count)
         return dd
 
-    def build_word_cards(self, word_count: Dict[str, int]):
+    def build_word_cards(self, word_count: Dict[str, WordCard]):
         for w in word_count:
+            card = word_count[w]
+            # we modified this value while calculating mean_sq_distance
+            card.root_count = 1
+            card.mean_sq_distance = math.sqrt(card.mean_sq_distance / card.count)
             self.words_total += 1
-            self.words.append(WordCard(w, word_count[w]))
+            self.words.append(card)
         self.words.sort(key=lambda w: w.word)
 
-    def read_file(self, file_path: str, word_count: Dict[str, int]):
+    def read_file(self, file_path: str, word_count: Dict[str, WordCard]):
         with codecs.open(file_path, 'r', encoding='utf-8') as fr:
             text = fr.read()
         words = text.split(' ')
@@ -70,6 +78,7 @@ class DetailedDictionary:
         for w in words:
             if not w:
                 continue
+            self.words_in_text += 1
             for ngram_len, ngram in cur_ngrams:
                 ngram.append(w)
                 if len(ngram) < ngram_len:
@@ -84,8 +93,19 @@ class DetailedDictionary:
                 else:
                     self.word_grams[ngr_key] = ngr_item + 1
             self.words_processed += 1
-            count = word_count.get(w) or 0
-            word_count[w] = count + 1
+            card = word_count.get(w)
+            if not card:
+                card = WordCard(w, 1)
+                word_count[w] = card
+            else:
+                card.count += 1
+            # in root_count we store previos position occupied by word
+            # to calculate sum of squared distances between word occurrences
+            distance = self.words_in_text - card.root_count
+            distance = distance * distance
+            card.mean_sq_distance += distance
+            card.root_count = self.words_in_text
+
         self.files_processed += 1
 
     def json_serialize(self) -> str:
@@ -95,6 +115,7 @@ class DetailedDictionary:
         data = {
             'files_processed': self.files_processed,
             'words_processed': self.words_processed,
+            'words_in_text': self.words_in_text,
             'word_grams': ngrams_selected
         }
         data['words'] = {w.word: {
@@ -102,7 +123,8 @@ class DetailedDictionary:
             'prefix': w.prefix or '',
             'suffix': w.suffix or '',
             'count': w.count,
-            'root_count': w.root_count
+            'root_count': w.root_count,
+            'mean_sq_distance': w.mean_sq_distance
         } for w in self.words}
         return json.dumps(data)
 
@@ -113,6 +135,7 @@ class DetailedDictionary:
 
         dd.files_processed = data['files_processed']
         dd.words_processed = data['words_processed']
+        dd.words_in_text = data['words_in_text']
         word_grams = data['word_grams']
         for wg in word_grams:
             wg_len = sum([1 for c in wg if c == ' ']) + 1
@@ -125,6 +148,7 @@ class DetailedDictionary:
             word.prefix = words_data[wrd]['prefix']
             word.suffix = words_data[wrd]['suffix']
             word.root_count = words_data[wrd]['root_count']
+            word.mean_sq_distance = words_data[wrd]['mean_sq_distance']
             dd.words.append(word)
         dd.words_total = len(dd.words)
         return dd
